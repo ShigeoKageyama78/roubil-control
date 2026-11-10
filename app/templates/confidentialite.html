@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titre %}Confidentialité – ROUBIL CONTROLE{% endblock %}
+{% block contenu %}
+<section class="conteneur section texte">
+  <h1>Protection des données personnelles</h1>
+  <p>Ce site respecte la loi marocaine n° 09-08 relative à la protection des personnes physiques à l'égard du traitement des données à caractère personnel (autorité de contrôle : CNDP).</p>
+  <h2>Données collectées</h2>
+  <p>Uniquement celles que vous saisissez dans le formulaire de contact : nom, numéro de téléphone et message. Aucun outil de mesure d'audience ni service tiers n'est utilisé.</p>
+  <h2>Finalité</h2>
+  <p>Vous répondre au sujet de votre demande. Elles ne sont ni revendues ni transmises à des tiers.</p>
+  <h2>Durée de conservation</h2>
+  <p>Les messages sont supprimés automatiquement après {{ settings.retention_days }} jours.</p>
+  <h2>Cookies</h2>
+  <p>Un seul cookie technique de session, nécessaire à la sécurité du formulaire. Il ne sert pas au suivi.</p>
+  <h2>Vos droits</h2>
+  <p>Vous pouvez demander l'accès, la rectification ou la suppression de vos données en contactant directement le centre (téléphone ou adresse indiquée en bas de page).</p>
+  <p><a href="/">Retour à l'accueil</a></p>
+</section>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titre %}Connexion – administration{% endblock %}
+{% block tete %}<meta name="robots" content="noindex">{% endblock %}
+{% block contenu %}
+<section class="conteneur etroit section">
+  <h1>Administration</h1>
+  {% if erreur %}<p class="erreur" role="alert">{{ erreur }}</p>{% endif %}
+  <form method="post" action="/admin/login">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label for="identifiant">Identifiant</label>
+    <input id="identifiant" name="identifiant" required autocomplete="username">
+    <label for="mot_de_passe">Mot de passe</label>
+    <input id="mot_de_passe" name="mot_de_passe" type="password" required autocomplete="current-password">
+    <button class="bouton" type="submit">Se connecter</button>
+  </form>
+</section>
+{% endblock %}

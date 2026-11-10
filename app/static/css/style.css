@@ -1,0 +1,57 @@
+/* Feuille de style unique. Thème clair uniquement, polices système (aucune ressource externe,
+   ce qui permet une politique de sécurité de contenu stricte : style-src 'self'). */
+:root{--encre:#14213d;--texte:#222831;--gris:#5b6472;--bord:#d9dde3;--fond:#f4f6f9;--accent:#c77700;--blanc:#fff;--ok:#1b6e3c;--ko:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--texte);background:var(--blanc);line-height:1.6}
+h1,h2,h3{color:var(--encre);line-height:1.25}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);margin:.2em 0}
+h2{font-size:1.6rem;margin:0 0 1rem}
+a{color:var(--encre)}
+.conteneur{max-width:1040px;margin:0 auto;padding:0 20px}
+.etroit{max-width:620px}
+.section{padding:56px 20px}
+.fond{background:var(--fond);padding:56px 0}
+.saut{position:absolute;left:-999px}.saut:focus{left:8px;top:8px;background:var(--blanc);padding:8px;z-index:10}
+.invisible{position:absolute;left:-9999px}
+.piege{position:absolute;left:-9999px;height:0;overflow:hidden}
+.entete{border-bottom:1px solid var(--bord);background:var(--blanc);position:sticky;top:0;z-index:5}
+.entete-contenu{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+.logo{font-weight:700;letter-spacing:.04em;text-decoration:none}
+nav a{margin-left:18px;text-decoration:none;color:var(--gris)}nav a:hover{color:var(--encre)}
+.hero{padding:72px 0 56px;border-bottom:1px solid var(--bord)}
+.surtitre{color:var(--accent);font-weight:600;margin:0}
+.intro{max-width:640px;font-size:1.1rem;color:var(--gris)}
+.bouton{display:inline-block;background:var(--encre);color:var(--blanc);border:2px solid var(--encre);padding:11px 22px;border-radius:6px;font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.bouton.secondaire{background:var(--blanc);color:var(--encre)}
+.bouton.petit{padding:5px 12px;font-size:.9rem}
+.bouton:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.carte{border:1px solid var(--bord);border-radius:8px;padding:20px;background:var(--blanc)}
+.carte h3{margin-top:0}
+.prix{font-size:1.5rem;font-weight:700;color:var(--encre);margin:.4em 0 0}
+.detail{color:var(--gris);font-size:.9rem;margin:0}
+form label{display:block;font-weight:600;margin:14px 0 4px}
+input,select,textarea{width:100%;font:inherit;padding:10px;border:1px solid #9aa3b0;border-radius:6px;background:var(--blanc)}
+.case{font-weight:400;display:flex;gap:8px;align-items:center}.case input{width:auto}
+.resultat{font-size:1.4rem;font-weight:700;color:var(--encre);min-height:2em}
+.etapes{list-style:none;counter-reset:e;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.etapes li{counter-increment:e;border-left:3px solid var(--accent);padding-left:14px}
+.etapes li::before{content:counter(e);font-weight:700;color:var(--accent)}
+.etapes strong,.etapes span{display:block}
+.horaires{border-collapse:collapse;min-width:280px}
+.horaires th{text-align:left;padding:6px 32px 6px 0}
+details{border-bottom:1px solid var(--bord);padding:12px 0}summary{cursor:pointer;font-weight:600}
+.erreur{color:var(--ko);margin:4px 0}
+.succes{color:var(--ok);font-weight:600}
+.mention{font-size:.85rem;color:var(--gris)}
+.pied{border-top:1px solid var(--bord);padding:24px 0;font-size:.9rem;color:var(--gris)}
+.texte{max-width:720px;margin:0 auto}
+.barre{display:flex;justify-content:space-between;align-items:center}
+.admin{width:100%;border-collapse:collapse;margin-bottom:32px}
+.admin th,.admin td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--bord)}
+.admin input{padding:6px}.admin input[type=checkbox]{width:auto}
+.message{border:1px solid var(--bord);border-radius:6px;padding:12px 16px;margin:10px 0}
+.message.non-lu{border-left:4px solid var(--accent)}
+.corps{white-space:pre-wrap}
+.actions{display:flex;gap:8px}
+@media (max-width:640px){nav a{margin:0 12px 0 0}.section{padding:40px 20px}}

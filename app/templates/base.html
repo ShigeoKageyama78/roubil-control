@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}ROUBIL CONTROLE – Centre de contrôle technique à Bouskoura{% endblock %}</title>
+  <meta name="description" content="{% block description %}Centre de contrôle technique automobile à Bouskoura (Casablanca), affilié au réseau SGS Maroc. Tarifs, horaires et contact.{% endblock %}">
+  <link rel="stylesheet" href="/static/css/style.css">
+  {% block tete %}{% endblock %}
+</head>
+<body>
+<a class="saut" href="#contenu">Aller au contenu</a>
+{% block entete %}{% endblock %}
+<main id="contenu">{% block contenu %}{% endblock %}</main>
+{% block pied %}
+<footer class="pied">
+  <div class="conteneur">
+    <p><strong>ROUBIL CONTROLE</strong> – Douar Lahfaya, Route de Médiouna, Bouskoura, 20000 Casablanca</p>
+    <p><a href="/confidentialite">Confidentialité</a></p>
+  </div>
+</footer>
+{% endblock %}
+</body>
+</html>

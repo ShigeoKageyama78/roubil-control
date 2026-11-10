@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block tete %}
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "AutomotiveBusiness",
+  "name": "ROUBIL CONTROLE",
+  "telephone": "+212661074829",
+  "address": {"@type": "PostalAddress", "streetAddress": "Douar Lahfaya, Route de Médiouna", "addressLocality": "Bouskoura", "postalCode": "20000", "addressCountry": "MA"}
+}</script>
+<script src="/static/js/simulateur.js" defer></script>
+<script src="/static/js/formulaire.js" defer></script>
+{% endblock %}
+
+{% block entete %}
+<header class="entete">
+  <div class="conteneur entete-contenu">
+    <a class="logo" href="/">ROUBIL CONTROLE</a>
+    <nav aria-label="Navigation principale">
+      <a href="#services">Services</a>
+      <a href="#simulateur">Simulateur</a>
+      <a href="#deroulement">Déroulement</a>
+      <a href="#faq">Questions</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+{% endblock %}
+
+{% block contenu %}
+<section class="hero">
+  <div class="conteneur">
+    <p class="surtitre">Centre de contrôle technique · Bouskoura, Casablanca</p>
+    <h1>Le contrôle technique de votre véhicule, simplement.</h1>
+    <p class="intro">Centre affilié au réseau SGS Maroc. Retrouvez ici nos prestations, nos tarifs et nos horaires, et écrivez-nous pour toute question.</p>
+    <p><a class="bouton" href="#contact">Nous écrire</a> <a class="bouton secondaire" href="tel:+212661074829">Appeler le centre</a></p>
+  </div>
+</section>
+
+<section id="services" class="conteneur section">
+  <h2>Nos prestations et tarifs</h2>
+  <div class="grille">
+    {% for p in prestations %}
+    <article class="carte">
+      <h3>{{ p.nom }}</h3>
+      <p>{{ p.description }}</p>
+      {% if p.tarif %}
+      <p class="prix">{{ p.tarif.montant_dh }} DH</p>
+      <p class="detail">{{ p.tarif.libelle_vehicule }}{% if p.tarif.note %} · {{ p.tarif.note }}{% endif %}</p>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="simulateur" class="fond section">
+  <div class="conteneur">
+    <h2>Simulateur de tarif</h2>
+    <p>Choisissez votre prestation pour connaître le montant. Le calcul se fait dans votre navigateur à partir des tarifs actuels du centre.</p>
+    <form id="form-simulateur" class="simulateur">
+      <label for="sim-prestation">Prestation</label>
+      <select id="sim-prestation" disabled><option>Chargement…</option></select>
+      <label class="case"><input type="checkbox" id="sim-contre"> J'ai déjà passé la visite et je reviens après réparation</label>
+      <p id="sim-resultat" class="resultat" aria-live="polite"></p>
+    </form>
+    <noscript><p>Le simulateur nécessite JavaScript ; les tarifs restent consultables ci-dessus.</p></noscript>
+  </div>
+</section>
+
+<section id="deroulement" class="conteneur section">
+  <h2>Déroulement d'une visite</h2>
+  <ol class="etapes">
+    <li><strong>Accueil</strong><span>Présentez la carte grise et une pièce d'identité.</span></li>
+    <li><strong>Contrôle</strong><span>Le véhicule passe sur la ligne : freinage, éclairage, direction, pollution, carrosserie.</span></li>
+    <li><strong>Résultat</strong><span>Un procès-verbal vous est remis à l'issue du contrôle.</span></li>
+    <li><strong>Contre-visite</strong><span>En cas de défaut, réparez puis revenez dans le délai indiqué.</span></li>
+  </ol>
+</section>
+
+<section class="fond section">
+  <div class="conteneur">
+    <h2>Horaires</h2>
+    <table class="horaires">
+      <caption class="invisible">Horaires d'ouverture</caption>
+      <tbody>
+      {% for h in horaires %}
+        <tr><th scope="row">{{ h.jour }}</th><td>{% if h.ferme %}Fermé{% else %}{{ h.ouverture }} – {{ h.fermeture }}{% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="faq" class="conteneur section">
+  <h2>Questions fréquentes</h2>
+  <details><summary>Quels documents apporter ?</summary><p>La carte grise du véhicule et votre pièce d'identité.</p></details>
+  <details><summary>Que faire si mon véhicule est refusé ?</summary><p>Faites réparer les défauts indiqués sur le procès-verbal, puis présentez-vous pour une contre-visite dans le délai mentionné.</p></details>
+  <details><summary>Faut-il prendre rendez-vous ?</summary><p>Ce site n'a pas de système de réservation. Contactez le centre par téléphone ou via le formulaire ci-dessous.</p></details>
+</section>
+
+<section id="contact" class="fond section">
+  <div class="conteneur etroit">
+    <h2>Nous contacter</h2>
+    {% if envoye %}
+      <p class="succes" role="status">Merci, votre message a bien été envoyé. Nous vous rappelons rapidement.</p>
+    {% endif %}
+    {% if erreurs.general %}<p class="erreur" role="alert">{{ erreurs.general }}</p>{% endif %}
+    <form method="post" action="/contact" novalidate id="form-contact">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="piege" aria-hidden="true">
+        <label for="site_web">Ne pas remplir</label>
+        <input type="text" id="site_web" name="site_web" tabindex="-1" autocomplete="off">
+      </div>
+      <label for="nom">Nom</label>
+      <input id="nom" name="nom" value="{{ valeurs.nom or '' }}" maxlength="80" required autocomplete="name">
+      {% if erreurs.nom %}<p class="erreur">{{ erreurs.nom }}</p>{% endif %}
+      <label for="telephone">Téléphone</label>
+      <input id="telephone" name="telephone" value="{{ valeurs.telephone or '' }}" maxlength="25" required autocomplete="tel" inputmode="tel">
+      {% if erreurs.telephone %}<p class="erreur">{{ erreurs.telephone }}</p>{% endif %}
+      <label for="contenu">Message</label>
+      <textarea id="contenu" name="contenu" rows="5" maxlength="1000" required>{{ valeurs.contenu or '' }}</textarea>
+      {% if erreurs.contenu %}<p class="erreur">{{ erreurs.contenu }}</p>{% endif %}
+      <p class="mention">En envoyant ce formulaire, vous acceptez que vos données soient utilisées pour répondre à votre demande et conservées {{ settings.retention_days }} jours. <a href="/confidentialite">En savoir plus</a>.</p>
+      <button class="bouton" type="submit">Envoyer</button>
+    </form>
+  </div>
+</section>
+{% endblock %}
