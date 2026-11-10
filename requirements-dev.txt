@@ -4,3 +4,4 @@ pytest==9.1.1
 httpx==0.28.1              # client utilisé par le TestClient de FastAPI
 bandit==1.9.4              # analyse statique de sécurité du code Python
 pip-audit==2.10.1           # recherche de vulnérabilités connues dans les dépendances
+pytest-cov==7.1.0
