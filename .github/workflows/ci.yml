@@ -1,0 +1,27 @@
+# Intégration continue : à chaque push, on rejoue les tests et les analyses de sécurité.
+name: CI
+on: [push, pull_request]
+
+jobs:
+  qualite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Tests unitaires et d'intégration
+        run: python -m pytest -q --cov=app
+      - name: Analyse statique de sécurité (bandit)
+        run: bandit -q -r app
+      - name: Vulnérabilités des dépendances (pip-audit)
+        run: pip-audit -r requirements.txt
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: qualite
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t roubil-controle .
