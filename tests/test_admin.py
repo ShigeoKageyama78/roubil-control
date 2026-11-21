@@ -9,7 +9,7 @@ def test_admin_redirige_vers_login_sans_connexion(client):
 
 
 def test_post_admin_sans_connexion_refuse(client):
-    r = client.post("/admin/tarifs/1", data={"montant_dh": "1", "csrf": "x"}, follow_redirects=False)
+    r = client.post("/admin/tarifs/1", data={"csrf": "x"}, follow_redirects=False)
     assert r.status_code == 303 and r.headers["location"] == "/admin/login"
 
 
@@ -46,26 +46,40 @@ def test_connexion_et_tableau_de_bord(connecte):
     assert r.headers["cache-control"] == "no-store"
 
 
-def test_modifier_tarif_visible_sur_le_site(connecte, db):
-    pid = db.query(Prestation).first().id
-    r = connecte.post(f"/admin/tarifs/{pid}", data={"montant_dh": "399", "note": "Prix test",
-                                                    "csrf": jeton(connecte, "/admin/")}, follow_redirects=False)
-    assert r.status_code == 303
-    assert "399 DH" in connecte.get("/").text
+def _donnees_tarifs(prestation, **remplacements):
+    """Champs du formulaire : tous les montants actuels, avec éventuellement des valeurs remplacées."""
+    champs = {f"t_{t.id}": str(t.montant_dh) for t in prestation.tarifs}
+    champs.update(remplacements)
+    return champs
 
 
-def test_tarif_invalide_refuse(connecte, db):
+def test_modifier_tarifs_visible_sur_le_site(connecte, db):
     p = db.query(Prestation).first()
-    avant = p.tarif.montant_dh
+    premier = p.tarifs[0]
+    champs = _donnees_tarifs(p, **{f"t_{premier.id}": "399"})
+    r = connecte.post(f"/admin/tarifs/{p.id}", data={**champs, "csrf": jeton(connecte, "/admin/")},
+                      follow_redirects=False)
+    assert r.status_code == 303
+    assert "399" in connecte.get("/").text
+    db.expire_all()
+    assert db.get(type(premier), premier.id).montant_dh == 399
+
+
+def test_tarif_invalide_refuse_et_rien_n_est_enregistre(connecte, db):
+    p = db.query(Prestation).first()
+    a, b = p.tarifs[0], p.tarifs[1]
+    avant = (a.montant_dh, b.montant_dh)
     for valeur in ["-5", "0", "abc", "99999", ""]:
-        connecte.post(f"/admin/tarifs/{p.id}", data={"montant_dh": valeur, "csrf": jeton(connecte, "/admin/")})
-    db.refresh(p.tarif)
-    assert p.tarif.montant_dh == avant
+        champs = _donnees_tarifs(p, **{f"t_{a.id}": "777", f"t_{b.id}": valeur})
+        connecte.post(f"/admin/tarifs/{p.id}", data={**champs, "csrf": jeton(connecte, "/admin/")})
+    db.expire_all()
+    # Le premier montant (valide) n'a pas été enregistré non plus : tout ou rien.
+    assert (db.get(type(a), a.id).montant_dh, db.get(type(b), b.id).montant_dh) == avant
 
 
 def test_tarif_sans_csrf_refuse(connecte, db):
-    pid = db.query(Prestation).first().id
-    assert connecte.post(f"/admin/tarifs/{pid}", data={"montant_dh": "1"}).status_code == 403
+    p = db.query(Prestation).first()
+    assert connecte.post(f"/admin/tarifs/{p.id}", data=_donnees_tarifs(p)).status_code == 403
 
 
 def test_modifier_horaire(connecte, db):

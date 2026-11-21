@@ -22,7 +22,7 @@ Site : http://127.0.0.1:8000 · Administration : http://127.0.0.1:8000/admin/log
 ## Tests et contrôles
 
 ```bash
-python -m pytest -q --cov=app     # 44 tests
+python -m pytest -q --cov=app     # 46 tests
 bandit -r app                     # analyse statique de sécurité
 pip-audit -r requirements.txt     # vulnérabilités connues des dépendances
 ```
@@ -40,7 +40,8 @@ L'image n'a pas encore été construite dans l'environnement de développement (
 
 - Définir une `SECRET_KEY` longue et aléatoire (`python -c "import secrets; print(secrets.token_urlsafe(48))"`). Sans elle, une clé temporaire est générée et les sessions sont perdues à chaque redémarrage.
 - Passer `COOKIE_SECURE=true` (le site doit être servi en HTTPS).
-- **Les tarifs et horaires fournis sont des valeurs d'exemple** (`app/seed.py`). Le dirigeant doit les corriger dans l'espace d'administration.
+- **Tarifs :** recopiés de l'affiche officielle du centre (`app/seed.py`) ; à re-vérifier si l'affiche change. **Horaires : valeurs d'exemple** (absents de l'affiche), à corriger dans l'espace d'administration.
+- **Base existante :** il n'y a pas de migration de schéma. Si vous aviez lancé une ancienne version, supprimez le dossier `data/` (la base sera recréée) puis recréez le compte administrateur.
 - Renseigner SMTP_* si l'on veut être prévenu par e-mail (sinon les messages restent visibles dans l'administration).
 - Faire valider les mentions de confidentialité (loi 09-08 / CNDP) par le dirigeant.
 

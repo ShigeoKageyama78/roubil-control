@@ -8,11 +8,13 @@ Règles appliquées à CHAQUE route de ce fichier :
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from app.deps import exiger_admin, get_db
 from app.models import Administrateur, Horaire, Message, Prestation
 from app.security import csrf_valide, ip_client, jeton_csrf, verifier_mot_de_passe
+from app.routers.public import construire_grille
+from app.seed import TRANCHES
 from app.validation import nettoyer, valider_heure, valider_montant
 
 router = APIRouter(prefix="/admin")
@@ -81,12 +83,13 @@ def logout(request: Request, csrf: str = Form("")):
 def tableau_de_bord(request: Request, _: int = Depends(exiger_admin), db: Session = Depends(get_db)):
     messages = db.scalars(select(Message).order_by(Message.cree_le.desc())).all()
     prestations = db.scalars(
-        select(Prestation).options(joinedload(Prestation.tarif)).order_by(Prestation.ordre)
+        select(Prestation).options(selectinload(Prestation.tarifs)).order_by(Prestation.ordre)
     ).all()
     horaires = db.scalars(select(Horaire).order_by(Horaire.ordre)).all()
     return _page(
         request, "dashboard.html",
-        messages=messages, prestations=prestations, horaires=horaires,
+        messages=messages, prestations=prestations, horaires=horaires, tranches=TRANCHES,
+        grilles={p.id: construire_grille(p) for p in prestations},
         non_lus=sum(1 for m in messages if not m.lu),
         info=request.session.pop("info", ""), erreur=request.session.pop("erreur", ""),
     )
@@ -95,25 +98,29 @@ def tableau_de_bord(request: Request, _: int = Depends(exiger_admin), db: Sessio
 # --- Tarifs --------------------------------------------------------------------------------
 
 @router.post("/tarifs/{prestation_id}")
-def modifier_tarif(
-    prestation_id: int, request: Request, _: int = Depends(exiger_admin),
-    db: Session = Depends(get_db), montant_dh: str = Form(""), note: str = Form(""), csrf: str = Form(""),
-):
-    _verifier_csrf(request, csrf)
+async def modifier_tarifs(prestation_id: int, request: Request, _: int = Depends(exiger_admin),
+                          db: Session = Depends(get_db)):
+    """Enregistre en une fois tous les tarifs d'une prestation (les champs sont nommés t_<id>)."""
+    formulaire = await request.form()
+    _verifier_csrf(request, str(formulaire.get("csrf", "")))
     prestation = db.get(Prestation, prestation_id)
-    if prestation is None or prestation.tarif is None:
+    if prestation is None:
         raise HTTPException(status_code=404)
-    montant = valider_montant(montant_dh)
-    note = nettoyer(note)
-    if montant is None:
-        request.session["erreur"] = "Montant invalide : entrez un nombre entier entre 1 et 10 000."
-    elif len(note) > 160:
-        request.session["erreur"] = "La note est trop longue (160 caractères maximum)."
-    else:
-        prestation.tarif.montant_dh = montant
-        prestation.tarif.note = note
-        db.commit()
-        request.session["info"] = f"Tarif « {prestation.nom} » mis à jour."
+
+    # On valide TOUT avant de modifier quoi que ce soit : si un montant est faux, rien n'est enregistré.
+    nouveaux = {}
+    for tarif in prestation.tarifs:
+        montant = valider_montant(str(formulaire.get(f"t_{tarif.id}", "")))
+        if montant is None:
+            request.session["erreur"] = (
+                f"Montant invalide pour « {tarif.categorie}, {tarif.tranche_cv}, {tarif.resultat} » : "
+                "entrez un nombre entier entre 1 et 10 000. Rien n'a été enregistré.")
+            return RedirectResponse("/admin/", status_code=303)
+        nouveaux[tarif.id] = montant
+    for tarif in prestation.tarifs:
+        tarif.montant_dh = nouveaux[tarif.id]
+    db.commit()
+    request.session["info"] = f"Tarifs « {prestation.nom} » mis à jour."
     return RedirectResponse("/admin/", status_code=303)
 
 

@@ -11,15 +11,17 @@ Pas de framework JavaScript : le site est léger et l'essentiel fonctionne sans 
 
 ```mermaid
 erDiagram
-    PRESTATION ||--|| TARIF : "a"
+    PRESTATION ||--o{ TARIF : "a"
     PRESTATION { int id PK  string nom UK  text description  int ordre }
-    TARIF { int id PK  int prestation_id FK  string libelle_vehicule  int montant_dh  string note }
+    TARIF { int id PK  int prestation_id FK  string categorie  string tranche_cv  string resultat  int montant_dh }
     HORAIRE { int id PK  string jour UK  int ordre  bool ferme  string ouverture  string fermeture }
     MESSAGE { int id PK  string nom  string telephone  text contenu  bool lu  datetime cree_le }
     ADMINISTRATEUR { int id PK  string identifiant UK  string mot_de_passe_hash }
 ```
 
-Contraintes en base : `nom` et `jour` uniques, `montant_dh > 0` (CHECK), un tarif par prestation (UNIQUE sur la clé étrangère), suppression en cascade.
+Une **prestation** est un type de visite (périodique, complémentaire, mutation, volontaire). Ses **tarifs** (32 par prestation) couvrent chaque catégorie de véhicule, chaque tranche de puissance fiscale et chaque résultat (favorable ou défavorable), comme sur l'affiche officielle du centre.
+
+Contraintes en base : `nom` et `jour` uniques, `montant_dh > 0` (CHECK), une seule ligne par combinaison (prestation, catégorie, puissance, résultat : UNIQUE), suppression en cascade.
 
 ## Routes
 

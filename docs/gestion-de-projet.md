@@ -27,7 +27,7 @@ Itérations courtes, backlog priorisé (MoSCoW, voir `cahier-des-charges.md`), t
 
 | Risque | Probabilité | Impact | Mesure |
 |---|---|---|---|
-| Tarifs d'exemple pris pour les vrais | Moyenne | Fort | Signalés dans le README et `seed.py` ; à corriger via l'admin avant mise en ligne |
+| Tarifs ou horaires erronés | Moyenne | Fort | Tarifs recopiés de l'affiche officielle et testés ; horaires d'exemple signalés dans le README, à corriger via l'admin |
 | Faille de sécurité | Moyenne | Fort | Tests, bandit, pip-audit, en-têtes, revue OWASP |
 | Perte des messages (SQLite) | Faible | Moyen | Volume Docker ; sauvegarde à prévoir |
 | Données personnelles non conformes (09-08) | Moyenne | Moyen | Mention, consentement, purge à 90 jours ; validation à obtenir |

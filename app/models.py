@@ -2,14 +2,15 @@
 
 Schéma (voir docs/conception.md pour le MCD complet) :
 
-    Prestation 1 ──── 1 Tarif        un tarif par prestation
+    Prestation 1 ──── N Tarif        une prestation (type de visite) a de nombreux tarifs :
+                                     un par catégorie de véhicule, puissance fiscale et résultat
     Horaire                          une ligne par jour de la semaine
     Message                          messages envoyés via le formulaire de contact
     Administrateur                   comptes autorisés à se connecter à l'espace admin
 """
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -28,25 +29,30 @@ class Prestation(Base):
     description: Mapped[str] = mapped_column(Text)
     ordre: Mapped[int] = mapped_column(Integer, default=0)
 
-    tarif: Mapped["Tarif"] = relationship(
-        back_populates="prestation", uselist=False, cascade="all, delete-orphan"
+    tarifs: Mapped[list["Tarif"]] = relationship(
+        back_populates="prestation", cascade="all, delete-orphan", order_by="Tarif.id"
     )
 
 
 class Tarif(Base):
+    """Un prix (en dirhams TTC) pour une combinaison précise :
+    type de visite × catégorie de véhicule × puissance fiscale × résultat du contrôle."""
     __tablename__ = "tarif"
-    # Contrainte au niveau de la base : un prix ne peut pas être négatif ou nul.
-    __table_args__ = (CheckConstraint("montant_dh > 0", name="ck_tarif_positif"),)
+    __table_args__ = (
+        # Contrainte au niveau de la base : un prix ne peut pas être négatif ou nul.
+        CheckConstraint("montant_dh > 0", name="ck_tarif_positif"),
+        # Une seule ligne par combinaison : pas de doublons possibles.
+        UniqueConstraint("prestation_id", "categorie", "tranche_cv", "resultat", name="uq_tarif_combinaison"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    prestation_id: Mapped[int] = mapped_column(
-        ForeignKey("prestation.id", ondelete="CASCADE"), unique=True
-    )
-    libelle_vehicule: Mapped[str] = mapped_column(String(80))  # ex. « Voiture particulière »
+    prestation_id: Mapped[int] = mapped_column(ForeignKey("prestation.id", ondelete="CASCADE"))
+    categorie: Mapped[str] = mapped_column(String(60))    # ex. « Véhicule léger »
+    tranche_cv: Mapped[str] = mapped_column(String(30))   # ex. « 8 à 10 CV »
+    resultat: Mapped[str] = mapped_column(String(15))     # « Favorable » ou « Défavorable »
     montant_dh: Mapped[int] = mapped_column(Integer)
-    note: Mapped[str] = mapped_column(String(160), default="")
 
-    prestation: Mapped[Prestation] = relationship(back_populates="tarif")
+    prestation: Mapped[Prestation] = relationship(back_populates="tarifs")
 
 
 class Horaire(Base):

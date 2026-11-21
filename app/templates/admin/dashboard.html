@@ -13,25 +13,27 @@
   {% if info %}<p class="succes" role="status">{{ info }}</p>{% endif %}
   {% if erreur %}<p class="erreur" role="alert">{{ erreur }}</p>{% endif %}
 
-  <h2>Tarifs</h2>
-  <table class="admin">
-    <thead><tr><th>Prestation</th><th>Montant (DH)</th><th>Note</th><th></th></tr></thead>
-    <tbody>
-    {% for p in prestations %}
-      <tr>
-        {# Un <form> ne peut pas être enfant direct d'un <tr> : on le déclare dans la 1re cellule
-           et on y rattache les champs avec l'attribut form="..." #}
-        <td>{{ p.nom }}
-          <form id="tarif-{{ p.id }}" method="post" action="/admin/tarifs/{{ p.id }}">
-            <input type="hidden" name="csrf" value="{{ csrf }}">
-          </form></td>
-        <td><input form="tarif-{{ p.id }}" name="montant_dh" value="{{ p.tarif.montant_dh }}" inputmode="numeric" aria-label="Montant de {{ p.nom }}"></td>
-        <td><input form="tarif-{{ p.id }}" name="note" value="{{ p.tarif.note }}" maxlength="160" aria-label="Note de {{ p.nom }}"></td>
-        <td><button form="tarif-{{ p.id }}" class="bouton petit" type="submit">Enregistrer</button></td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <h2>Tarifs (DH TTC)</h2>
+  {% for p in prestations %}
+  <details class="grille-tarifs">
+    <summary>{{ p.nom }}</summary>
+    <form method="post" action="/admin/tarifs/{{ p.id }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="defile">
+      <table class="admin tarifs">
+        <thead><tr><th scope="col">Véhicule</th><th scope="col">Résultat</th>{% for t in tranches %}<th scope="col">{{ t }}</th>{% endfor %}</tr></thead>
+        <tbody>
+        {% for ligne in grilles[p.id] %}
+          <tr><th scope="row">{{ ligne.categorie }}</th><td>{{ ligne.resultat }}</td>
+          {% for t in ligne.tarifs %}<td><input name="t_{{ t.id }}" value="{{ t.montant_dh }}" inputmode="numeric" aria-label="{{ ligne.categorie }}, {{ ligne.resultat }}, {{ tranches[loop.index0] }}"></td>{% endfor %}</tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <button class="bouton petit" type="submit">Enregistrer les tarifs : {{ p.nom }}</button>
+    </form>
+  </details>
+  {% endfor %}
 
   <h2>Horaires</h2>
   <table class="admin">

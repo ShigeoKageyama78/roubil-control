@@ -55,3 +55,10 @@ details{border-bottom:1px solid var(--bord);padding:12px 0}summary{cursor:pointe
 .corps{white-space:pre-wrap}
 .actions{display:flex;gap:8px}
 @media (max-width:640px){nav a{margin:0 12px 0 0}.section{padding:40px 20px}}
+.grille-tarifs{margin-top:14px}
+.defile{overflow-x:auto}
+.tarifs{border-collapse:collapse;width:100%;font-size:.92rem;margin:10px 0}
+.tarifs th,.tarifs td{border-bottom:1px solid var(--bord);padding:6px 10px;text-align:left}
+.tarifs thead th{background:var(--fond)}
+.tarifs td{font-variant-numeric:tabular-nums}
+.admin.tarifs input{width:80px}

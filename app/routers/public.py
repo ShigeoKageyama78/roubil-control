@@ -2,24 +2,46 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse, Response
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from app.deps import get_db
 from app.models import Horaire, Message, Prestation
 from app.notifications import notifier_nouveau_message
+from app.seed import CATEGORIES, RESULTATS, TRANCHES
 from app.security import csrf_valide, ip_client, jeton_csrf
 from app.validation import valider_contact
 
 router = APIRouter()
 
 
+def _lire_prestations(db: Session) -> list[Prestation]:
+    return db.scalars(
+        select(Prestation).options(selectinload(Prestation.tarifs)).order_by(Prestation.ordre)
+    ).all()
+
+
+def construire_grille(prestation: Prestation) -> list[dict]:
+    """Met les tarifs d'une prestation sous forme de tableau : une ligne par
+    (catégorie, résultat), une colonne par tranche de puissance fiscale."""
+    montants = {(t.categorie, t.resultat, t.tranche_cv): t for t in prestation.tarifs}
+    lignes = []
+    for categorie in CATEGORIES:
+        for resultat in RESULTATS:
+            cases = [montants.get((categorie, resultat, tranche)) for tranche in TRANCHES]
+            if all(cases):
+                lignes.append({"categorie": categorie, "resultat": resultat, "tarifs": cases})
+    return lignes
+
+
 def _donnees_accueil(db: Session) -> dict:
     """Charge depuis la base tout ce que la page d'accueil affiche."""
-    prestations = db.scalars(
-        select(Prestation).options(joinedload(Prestation.tarif)).order_by(Prestation.ordre)
-    ).all()
+    prestations = _lire_prestations(db)
     horaires = db.scalars(select(Horaire).order_by(Horaire.ordre)).all()
-    return {"prestations": prestations, "horaires": horaires}
+    grilles = {p.id: construire_grille(p) for p in prestations}
+    # « À partir de » : le plus petit tarif de la prestation, pour la carte de présentation.
+    minimums = {p.id: min((t.montant_dh for t in p.tarifs), default=None) for p in prestations}
+    return {"prestations": prestations, "horaires": horaires, "grilles": grilles,
+            "minimums": minimums, "tranches": TRANCHES}
 
 
 def _rendre_accueil(request: Request, db: Session, status_code: int = 200, **extra) -> Response:
@@ -46,22 +68,18 @@ def accueil(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/api/tarifs")
 def api_tarifs(db: Session = Depends(get_db)):
-    """Tarifs au format JSON : utilisés par le simulateur de tarif (static/js/simulateur.js)."""
-    prestations = db.scalars(
-        select(Prestation).options(joinedload(Prestation.tarif)).order_by(Prestation.ordre)
-    ).all()
+    """Tous les tarifs au format JSON : utilisés par le simulateur (static/js/simulateur.js)."""
     return JSONResponse(
         [
             {
-                "id": p.id,
-                "nom": p.nom,
-                "vehicule": p.tarif.libelle_vehicule,
-                "montant_dh": p.tarif.montant_dh,
-                "note": p.tarif.note,
-                "est_contre_visite": p.nom.lower().startswith("contre-visite"),
+                "prestation": p.nom,
+                "categorie": t.categorie,
+                "tranche_cv": t.tranche_cv,
+                "resultat": t.resultat,
+                "montant_dh": t.montant_dh,
             }
-            for p in prestations
-            if p.tarif
+            for p in _lire_prestations(db)
+            for t in p.tarifs
         ]
     )
 

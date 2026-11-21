@@ -38,28 +38,44 @@
 
 <section id="services" class="conteneur section">
   <h2>Nos prestations et tarifs</h2>
+  <p>Tarifs TTC en dirhams, selon le type de visite, la catégorie du véhicule, sa puissance fiscale et le résultat du contrôle.</p>
   <div class="grille">
     {% for p in prestations %}
     <article class="carte">
       <h3>{{ p.nom }}</h3>
       <p>{{ p.description }}</p>
-      {% if p.tarif %}
-      <p class="prix">{{ p.tarif.montant_dh }} DH</p>
-      <p class="detail">{{ p.tarif.libelle_vehicule }}{% if p.tarif.note %} · {{ p.tarif.note }}{% endif %}</p>
-      {% endif %}
+      {% if minimums[p.id] %}<p class="prix"><span class="detail">à partir de</span> {{ minimums[p.id] }} DH</p>{% endif %}
     </article>
     {% endfor %}
   </div>
+  {% for p in prestations %}
+  <details class="grille-tarifs">
+    <summary>Voir la grille : {{ p.nom }}</summary>
+    <div class="defile">
+    <table class="tarifs">
+      <thead><tr><th scope="col">Véhicule</th><th scope="col">Résultat</th>{% for t in tranches %}<th scope="col">{{ t }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for ligne in grilles[p.id] %}
+        <tr><th scope="row">{{ ligne.categorie }}</th><td>{{ ligne.resultat }}</td>{% for t in ligne.tarifs %}<td>{{ t.montant_dh }}</td>{% endfor %}</tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </details>
+  {% endfor %}
 </section>
 
 <section id="simulateur" class="fond section">
   <div class="conteneur">
     <h2>Simulateur de tarif</h2>
-    <p>Choisissez votre prestation pour connaître le montant. Le calcul se fait dans votre navigateur à partir des tarifs actuels du centre.</p>
+    <p>Choisissez votre visite, votre véhicule et sa puissance pour connaître le montant selon le résultat du contrôle. Les tarifs affichés sont ceux enregistrés par le centre.</p>
     <form id="form-simulateur" class="simulateur">
-      <label for="sim-prestation">Prestation</label>
+      <label for="sim-prestation">Type de visite</label>
       <select id="sim-prestation" disabled><option>Chargement…</option></select>
-      <label class="case"><input type="checkbox" id="sim-contre"> J'ai déjà passé la visite et je reviens après réparation</label>
+      <label for="sim-categorie">Véhicule</label>
+      <select id="sim-categorie" disabled></select>
+      <label for="sim-cv">Puissance fiscale</label>
+      <select id="sim-cv" disabled></select>
       <p id="sim-resultat" class="resultat" aria-live="polite"></p>
     </form>
     <noscript><p>Le simulateur nécessite JavaScript ; les tarifs restent consultables ci-dessus.</p></noscript>

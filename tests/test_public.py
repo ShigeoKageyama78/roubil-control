@@ -7,15 +7,37 @@ VALIDE = {"nom": "Karim B.", "telephone": "+212 6 12 34 56 78", "contenu": "Quel
 def test_accueil_affiche_les_tarifs_de_la_base(client):
     r = client.get("/")
     assert r.status_code == 200
-    assert "Visite technique périodique" in r.text and "DH" in r.text
+    assert "Visite technique périodique" in r.text and "DH" in r.text and "à partir de" in r.text
 
 
 def test_api_tarifs_json(client):
     r = client.get("/api/tarifs")
     assert r.status_code == 200
     donnees = r.json()
-    assert len(donnees) == 5 and all(isinstance(t["montant_dh"], int) for t in donnees)
-    assert sum(t["est_contre_visite"] for t in donnees) == 1
+    # 4 types de visite x 4 catégories x 4 puissances x 2 résultats
+    assert len(donnees) == 128 and all(isinstance(t["montant_dh"], int) for t in donnees)
+
+
+def _prix(donnees, prestation, categorie, tranche, resultat):
+    return next(t["montant_dh"] for t in donnees if (t["prestation"], t["categorie"], t["tranche_cv"], t["resultat"])
+                == (prestation, categorie, tranche, resultat))
+
+
+def test_tarifs_conformes_a_l_affiche_officielle(client):
+    """Quelques valeurs relevées sur l'affiche du centre (tarifs TTC)."""
+    d = client.get("/api/tarifs").json()
+    assert _prix(d, "Visite technique périodique", "Véhicule léger", "Moins de 8 CV", "Favorable") == 350
+    assert _prix(d, "Visite technique périodique", "Véhicule léger", "15 CV et plus", "Favorable") == 420
+    assert _prix(d, "Visite technique périodique", "Véhicule léger", "11 à 14 CV", "Défavorable") == 240
+    assert _prix(d, "Visite complémentaire", "Véhicule léger", "8 à 10 CV", "Favorable") == 214
+    assert _prix(d, "Visite complémentaire", "Autocar", "Moins de 8 CV", "Défavorable") == 168
+    assert _prix(d, "Visite mutation", "Véhicule supérieur à 15 000 kg", "15 CV et plus", "Favorable") == 610
+    assert _prix(d, "Visite technique volontaire", "Véhicule inférieur à 15 000 kg", "11 à 14 CV", "Favorable") == 520
+
+
+def test_grille_affichee_sur_la_page(client):
+    page = client.get("/").text
+    assert "Moins de 8 CV" in page and "Véhicule léger" in page and "420" in page
 
 
 def test_en_tetes_de_securite(client):
