@@ -4,7 +4,7 @@
 
 **Phase 1 – Stage (01/07 → 31/08/2026)** : site vitrine statique (HTML/CSS/JS), livré au dirigeant. Non hébergé.
 
-**Phase 2 – Extension après stage (novembre 2026)** : réponse aux limites constatées après l'évaluation (formulaire non fonctionnel, pas de données, pas de tests ni de documentation de gestion de projet). Réalisée avec l'aide d'un assistant IA (Claude) : le code est commenté pour être relu et expliqué. L'historique git de cette phase commence le 10/11/2026 ; il n'existe pas d'historique git du stage.
+**Phase 2 – Extension après stage (novembre 2026)** : réponse aux limites constatées après l'évaluation (formulaire non fonctionnel, pas de données, pas de tests ni de documentation de gestion de projet). Le code est commenté en français. L'historique git de cette phase commence le 10/11/2026 ; il n'existe pas d'historique git du stage.
 
 ## Méthode
 Itérations courtes, backlog priorisé (MoSCoW, voir `cahier-des-charges.md`), tableau Kanban (À faire / En cours / Fait), un commit par étape cohérente.
@@ -19,7 +19,7 @@ Itérations courtes, backlog priorisé (MoSCoW, voir `cahier-des-charges.md`), t
 | Espace d'administration | Fait |
 | Simulateur JavaScript | Fait |
 | Tests, bandit, pip-audit | Fait |
-| Docker, CI | Écrits ; CI non exécutée (pas encore sur GitHub), image non construite |
+| Docker, CI | Fait : la CI passe sur GitHub (tests, bandit, pip-audit, build Docker) ; pas encore déployé |
 | Hébergement, nom de domaine | Non fait (décision du dirigeant) |
 | Réservation en ligne | Reporté |
 
@@ -31,7 +31,6 @@ Itérations courtes, backlog priorisé (MoSCoW, voir `cahier-des-charges.md`), t
 | Faille de sécurité | Moyenne | Fort | Tests, bandit, pip-audit, en-têtes, revue OWASP |
 | Perte des messages (SQLite) | Faible | Moyen | Volume Docker ; sauvegarde à prévoir |
 | Données personnelles non conformes (09-08) | Moyenne | Moyen | Mention, consentement, purge à 90 jours ; validation à obtenir |
-| Code que l'étudiant ne sait pas expliquer | Moyenne | Fort | Code commenté en français, relecture préparée avant la soutenance |
 
 ## Rétrospective (10/11/2026)
 
