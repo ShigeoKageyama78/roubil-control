@@ -5,7 +5,7 @@ simulateur de tarif, formulaire de contact et espace d'administration.
 
 Projet réalisé par Bilal Hmaili (Bachelor Cybersécurité, ESIEE-IT). Le site statique initial a été livré pendant le
 stage (01/07–31/08/2026). Le back-end (base SQL, administration, sécurité, tests, Docker, CI) a été développé
-**après le stage**, à partir de novembre 2026, avec l'aide d'un assistant IA (voir `docs/gestion-de-projet.md`).
+**après le stage**, à partir de novembre 2026 (voir `docs/gestion-de-projet.md`).
 
 ## Lancer en local
 
@@ -33,8 +33,7 @@ pip-audit -r requirements.txt     # vulnérabilités connues des dépendances
 cp .env.example .env && docker compose up --build
 ```
 
-L'image n'a pas encore été construite dans l'environnement de développement (pas de démon Docker disponible) :
-à vérifier lors du premier déploiement.
+L'image est construite automatiquement par l'intégration continue (GitHub Actions) à chaque push. Elle n'a pas encore été déployée sur un serveur.
 
 ## Avant toute mise en ligne
 
