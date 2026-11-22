@@ -7,7 +7,7 @@
 **Phase 2 – Extension après stage (novembre 2026)** : réponse aux limites constatées après l'évaluation (formulaire non fonctionnel, pas de données, pas de tests ni de documentation de gestion de projet). Le code est commenté en français. L'historique git de cette phase commence le 10/11/2026 ; il n'existe pas d'historique git du stage.
 
 ## Méthode
-Itérations courtes, backlog priorisé (MoSCoW, voir `cahier-des-charges.md`), tableau Kanban (À faire / En cours / Fait), un commit par étape cohérente.
+Itérations courtes, backlog priorisé (MoSCoW, voir `cahier-des-charges.md`) avec le statut de chaque étape (tableau ci-dessous), un commit par étape cohérente.
 
 ## Backlog et avancement au 10/11/2026
 
